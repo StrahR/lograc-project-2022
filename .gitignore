@@ -5,3 +5,17 @@
 *.agdai
 MAlonzo/**
 _build/
+
+# latex specific - za teoretične zapiske
+*.aux
+*.bcf
+*.bcf
+*.fdb_latexmk
+*.log
+*.bbl
+*.blg
+*.out
+*.xmpi
+*.fls
+
+*.pdf
