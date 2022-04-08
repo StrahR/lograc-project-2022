@@ -1,0 +1,64 @@
+\documentclass[12pt]{article}
+\usepackage[slovene]{babel}
+\usepackage{amsthm}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{mathtools}
+
+\usepackage{tikz}
+\usetikzlibrary{cd, babel}
+\usepackage{quiver}
+
+
+\newtheorem{theorem}{Izrek}
+\newtheorem{statement}{Trditev}
+\newtheorem{lemma}{Lema}
+\newtheorem*{corrolary}{Posledica}
+
+\theoremstyle{definition}
+\newtheorem{definition}{Definicija}
+
+\newtheorem*{example}{Primer}
+\newtheorem*{example*}{Primer}
+\newtheorem*{examples}{Primeri}
+
+\theoremstyle{remark}
+\newtheorem*{remark}{Opomba}
+
+\title{Algebre (in koalgebre) za funktorje in monade}
+
+\newcommand{\C}{\mathcal{C}}
+\newcommand{\D}{\mathcal{D}}
+
+\DeclareMathOperator{\ob}{Ob}
+\DeclareMathOperator{\mor}{Mor}
+
+\begin{document}
+
+\section{Algebre za funktorje}
+
+\begin{definition}
+    Algebra za funktor \(F\) je objekt \( A \in \ob\C \) skupaj s preslikavo \( a : FA \to A \).
+\end{definition}
+\begin{definition}
+    \(F\)-homomorfizem \( f : (A, a) \to (B, b) \) je komutirajoč kvadrat
+    \[\begin{tikzcd}
+        FA & FB\\
+         A &  B
+        \arrow["Ff", from=1-1, to=1-2]
+        \arrow["a",  from=1-1, to=2-1]
+        \arrow["b",  from=1-2, to=2-2]
+        \arrow["f",  from=2-1, to=2-2]
+    \end{tikzcd}\]
+\end{definition}
+
+\begin{example}
+    Naj bo \( FA = A \times A \), \( Ff = f \times f \).
+\end{example}
+\begin{example}
+    Naj bo \( FA = 1 + A \), \( Ff = 1 + f \).
+\end{example}
+
+
+\end{document}
+
