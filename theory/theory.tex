@@ -1,0 +1,67 @@
+\documentclass{article}
+
+\usepackage{fancyhdr}
+\usepackage{extramarks}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amsfonts}
+\usepackage{tikz}
+\usepackage{tikz-cd}
+\usepackage[plain]{algorithm}
+\usepackage{algpseudocode}
+
+
+\newcommand{\R}{\mathbb R}
+\newcommand{\N}{\mathbb N}
+\newcommand{\Z}{\mathbb Z}
+\newcommand{\C}{\mathbb C}
+\newcommand{\Q}{\mathbb Q}
+\newcommand{\Hb}{\mathbb H}
+\newcommand{\defeq}{\vcentcolon=}
+\newcommand{\sep}{\ensuremath{.\,}}
+
+\DeclareMathOperator*{\im}{im}
+\DeclareMathOperator*{\id}{id}
+\DeclareMathOperator*{\ann}{Ann}
+\DeclareMathOperator*{\spec}{Spec}
+\DeclareMathOperator*{\ob}{Ob}
+
+\newcommand{\E}{\mathrm{E}}
+\newcommand{\Var}{\mathrm{Var}}
+\newcommand{\Cov}{\mathrm{Cov}}
+\newcommand{\Bias}{\mathrm{Bias}}
+\renewcommand{\phi}{\varphi}
+
+\newtheorem{definition}{Definition}[section]
+
+\begin{document}
+    \title{Coalgebras for a functor}
+    \maketitle
+    \begin{definition}[Algebra]
+        \(S\) a category, \(F:S\to S\) an andofunctor.
+        
+        \(F\)-algebra is an object \(A\in \ob S\) with an arrow \(\alpha: F(A)\to A\). 
+    \end{definition}
+    \begin{definition}[Coalgebra for an endofunctor]
+        \(S\) a category, \(F:S\to S\) an endofunctor.
+
+        \(F\)-coalgebra is an object \(X\in \ob S\) with an arrow \(\alpha: X\to F(X)\).
+
+        We denote it \((X, \alpha: X\to FX)\)
+    \end{definition}
+    \begin{definition}[Coalgebra homomorphism]
+        \(S\) category, \(F:S\to S\) endofunctor, \((x,\alpha: x\to Fx)(y,\beta:y\to Fy)\) coalgebras
+
+        A coalgebra homomorphism \(f:(x,\alpha)\to (y,\beta)\) is a morphism \(f:x\to y\) in S where
+        \begin{align*}
+            \beta\circ f = F(f)\circ \alpha 
+        \end{align*}
+        \begin{center}
+            \begin{tikzcd}
+                x \arrow[d, "\alpha"] \arrow[r, "f"] & y \arrow[d, "\beta"] \\
+                F(y) \arrow[r, "F(f)"]               & F(y)                
+            \end{tikzcd}
+        \end{center}
+    \end{definition}
+    Coalgebras form a category. Objects are coalgebras, arrows are homomorphisms.
+\end{document}
