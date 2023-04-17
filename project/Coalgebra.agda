@@ -6,46 +6,74 @@ open import Categories.Functor using (Functor; Endofunctor; _∘F_) renaming (id
 
 open Definitions using (CommutativeSquare)
 
-import Relation.Binary.PropositionalEquality as Eq
-open Eq using (_≡_; refl; sym; trans; cong)
+-- import Relation.Binary.PropositionalEquality as Eq
+-- open Eq using (_≡_; refl; sym; trans; cong)
 
 private
-    variable
-        o l e : Level
+   variable
+      o l e : Level
 
 record Coalgebra {C : Category o l e} (F : Endofunctor C) : Set (o ⊔ l) where 
-    eta-equality
-    open Category C
-    open Functor F
-    field
-        X : Obj
-        α : X ⇒ F₀ X
+   eta-equality
+   open Category C
+   open Functor F
+   field
+      X : Obj
+      α : X ⇒ F₀ X
 
 record Coalg-hom {C : Category o l e} {F : Endofunctor C} (A B : Coalgebra F) : Set (l ⊔ e) where
-    eta-equality
-    open Category C
-    open Functor F
-    open Coalgebra A
-    open Coalgebra B renaming (X to Y; α to β)
-    field
-        map : X ⇒ Y
-        comm : CommutativeSquare C map α β (F₁ map) 
+   eta-equality
+   open Category C
+   open Functor F
+   open Coalgebra A
+   open Coalgebra B renaming (X to Y; α to β)
+   field
+      map : X ⇒ Y
+      comm : CommutativeSquare C α map (F₁ map) β
 
 CoalgCat : {C : Category o l e} → (F : Endofunctor C) → Category (o ⊔ l) (l ⊔ e) e
 CoalgCat {C = C} F = record
-    { Obj  = Coalgebra F
-    ; _⇒_ = Coalg-hom
-    ; _≈_  = λ f g → {!   !}
-    ; id   = record { map = id ; comm = {!  !} }
-    ; _∘_  = λ f g → record { map = map f ∘ map g ; comm = {!   !} }
-    ; assoc     = {!   !}
-    ; sym-assoc = {!   !}
-    ; identityˡ = λ {A} {B} {f} → {!   !}
-    ; identityʳ = {!   !}
-    ; identity² = {!   !}
-    ; equiv     = {!   !}
-    ; ∘-resp-≈  = {!   !}
-    }
-    where open Category C
-          open Functor F
-          open Coalg-hom 
+   { Obj  = Coalgebra F
+   ; _⇒_ = Coalg-hom
+   ; _≈_  = λ f g → map f ≈ map g
+   ; id   = record { map = id→ ; comm = id-comm-aux }
+   ; _∘_  = λ f g → record { map = map f ∘ map g ; comm = ∘-comm-aux f g }
+   ; assoc     = assoc
+   ; sym-assoc = sym-assoc
+   ; identityˡ = identityˡ
+   ; identityʳ = identityʳ
+   ; identity² = identity²
+   ; equiv     = record { refl = refl ; sym = sym ; trans = trans }
+   ; ∘-resp-≈  = ∘-resp-≈
+   }
+   where open Category C renaming (id to id→)
+         open Functor F
+         open Coalgebra
+         open Coalg-hom
+         open HomReasoning
+         open import Categories.Morphism.Reasoning C
+         open Equiv
+
+         id-comm-aux : {A : Coalgebra F}
+                     → CommutativeSquare C (α A) id→ (F₁ id→) (α A)
+         id-comm-aux {A} = begin
+            F₁ id→ ∘ α A ≈⟨ ∘-resp-≈ identity refl ⟩
+            id→ ∘ α A    ≈⟨ trans identityˡ (sym identityʳ) ⟩
+            α A ∘ id→    ∎
+         -- begin
+         --    α A ∘ id→      ≈⟨ identityʳ ⟩
+         --    α A            ≈⟨ Equiv.sym identityˡ ⟩
+         --    id→ ∘ α A      ≈⟨ ∘-resp-≈ (Equiv.sym identity) Equiv.refl ⟩
+         --    F₁ id→ ∘ α A   ∎
+         
+         ∘-comm-aux : {K L M : Coalgebra F}
+                    → (f : Coalg-hom L M) → (g : Coalg-hom K L)
+                    → CommutativeSquare C (α K) (map f ∘ map g) (F₁ (map f ∘ map g)) (α M)
+         ∘-comm-aux {K} {L} {M} f g = begin
+            F₁ (map f ∘ map g) ∘ α K      ≈⟨ ∘-resp-≈ homomorphism refl ⟩
+            (F₁ (map f) ∘ F₁ (map g)) ∘ α K ≈⟨ assoc ⟩
+            F₁ (map f) ∘ F₁ (map g) ∘ α K ≈⟨ ∘-resp-≈ refl (comm g) ⟩
+            F₁ (map f) ∘ α L ∘ map g      ≈⟨ sym assoc  ⟩
+            (F₁ (map f) ∘ α L) ∘ map g    ≈⟨ ∘-resp-≈ (comm f) refl ⟩
+            (α M ∘ map f) ∘ map g         ≈⟨ assoc ⟩
+            α M ∘ map f ∘ map g           ∎
