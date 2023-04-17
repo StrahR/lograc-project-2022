@@ -5,11 +5,11 @@ This project requires learning the basics of category theory and using
 
 The basic task is to:
 
-* define `F`-coalgebras and morphisms (alrady in the categories library)
-* show that they form a category
-* define polynomial functors on `Set` in one variable
-* define final `F`-coalgebras in terms of their universal property
-* show that polynomial functors have final coalgebras
+- [x] define `F`-coalgebras and morphisms (alrady in the categories library)
+- [x] show that they form a category
+- [ ] define polynomial functors on `Set` in one variable
+- [ ] define final `F`-coalgebras in terms of their universal property
+- [ ] show that polynomial functors have final coalgebras
 
 Possible extensions:
 
