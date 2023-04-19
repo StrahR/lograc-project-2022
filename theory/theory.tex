@@ -5,10 +5,12 @@
 \usepackage{amsmath}
 \usepackage{amsthm}
 \usepackage{amsfonts}
+\usepackage{hyperref}
 \usepackage{tikz}
 \usepackage{tikz-cd}
 \usepackage[plain]{algorithm}
 \usepackage{algpseudocode}
+\usepackage{graphicx}
 
 
 \newcommand{\R}{\mathbb R}
@@ -33,6 +35,8 @@
 \renewcommand{\phi}{\varphi}
 
 \newtheorem{definition}{Definition}[section]
+\newtheorem{example}{Example}[section]
+\newtheorem{lemma}{Lemma}[section]
 
 \begin{document}
     \title{Coalgebras for a functor}
@@ -64,4 +68,48 @@
         \end{center}
     \end{definition}
     Coalgebras form a category. Objects are coalgebras, arrows are homomorphisms.
+
+    \section{Polynomial functor}
+    A \href{https://ncatlab.org/nlab/show/polynomial+functor}{polynomial} in a (\href{https://ncatlab.org/nlab/show/locally+cartesian+closed+category}{nice}) category is a diagram of the form
+    \begin{center}
+        \begin{tikzcd}
+            x & y \arrow[l, "f"'] \arrow[r, "g"] & z \arrow[r, "h"] & w            
+        \end{tikzcd}
+    \end{center}
+    The corresponding polynomial functor is a composition of functors in the diagram
+    \begin{center}
+        \begin{tikzcd}
+            C/x \arrow[r, "f^*"] & C/y \arrow[r, "\prod_g"] & C/z \arrow[r, "\sum_h"] & C/w            
+        \end{tikzcd}
+    \end{center}
+    where \(/\) denotes slice categories, \(\prod_g\) is right adjoint to \(g^*\), \(\sum_h\) left adjoint to \(h^*\), \((-)^*\) are pullback functors. In Set, \(f\) and \(h\) are terminal maps.
+
+    \begin{definition}[polynomial functors in Set]
+        Given a function \(g:X\to Y\), a polynomial functor is a functor
+        \begin{align*}
+            p:Set\to Set\\
+            p:S\mapsto \coprod_{y\in Y} \{f:g^{-1}(y)\to S\}
+        \end{align*}
+        Or equivalently
+        \begin{align*}
+            p:S\mapsto \coprod_{y\in Y}S^{X_y}
+        \end{align*}
+    \end{definition}
+    \includegraphics[width=0.8\textwidth]{polyf}
+
+    I also present Awodey's definition:
+    \begin{definition}[Polynomial functors in Set]
+        A polynomial functor \(p\) is a functor 
+        \begin{align*}
+            p:Set\to Set\\
+            p:S\mapsto \coprod_{j\in\Gamma} C_j \times S^{B_j}
+        \end{align*}
+        If \(\Gamma\) is finite and \(B_j\)'s and \(C_j\)'s are finite, we get a familiar notion of a polynomial.
+    \end{definition}
+    
+    \begin{definition}[final coalgebra]
+        The terminal object in the category of F-Coalgebras.
+    \end{definition}
+
+    Polynomial functors preserve colimits
 \end{document}
