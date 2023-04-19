@@ -50,30 +50,15 @@ CoalgCat {C = C} F = record
          open Functor F
          open Coalgebra
          open Coalg-hom
-         open HomReasoning
-         open import Categories.Morphism.Reasoning C
          open Equiv
+         open import CommSqReasoning
+         open Reasoning C
 
          id-comm-aux : {A : Coalgebra F}
                      → CommutativeSquare C (α A) id→ (F₁ id→) (α A)
-         id-comm-aux {A} = begin
-            F₁ id→ ∘ α A ≈⟨ ∘-resp-≈ identity refl ⟩
-            id→ ∘ α A    ≈⟨ trans identityˡ (sym identityʳ) ⟩
-            α A ∘ id→    ∎
-         -- begin
-         --    α A ∘ id→      ≈⟨ identityʳ ⟩
-         --    α A            ≈⟨ Equiv.sym identityˡ ⟩
-         --    id→ ∘ α A      ≈⟨ ∘-resp-≈ (Equiv.sym identity) Equiv.refl ⟩
-         --    F₁ id→ ∘ α A   ∎
+         id-comm-aux = cong₃ (toSquare refl) identity
          
          ∘-comm-aux : {K L M : Coalgebra F}
                     → (f : Coalg-hom L M) → (g : Coalg-hom K L)
                     → CommutativeSquare C (α K) (map f ∘ map g) (F₁ (map f ∘ map g)) (α M)
-         ∘-comm-aux {K} {L} {M} f g = begin
-            F₁ (map f ∘ map g) ∘ α K      ≈⟨ ∘-resp-≈ homomorphism refl ⟩
-            (F₁ (map f) ∘ F₁ (map g)) ∘ α K ≈⟨ assoc ⟩
-            F₁ (map f) ∘ F₁ (map g) ∘ α K ≈⟨ ∘-resp-≈ refl (comm g) ⟩
-            F₁ (map f) ∘ α L ∘ map g      ≈⟨ sym assoc  ⟩
-            (F₁ (map f) ∘ α L) ∘ map g    ≈⟨ ∘-resp-≈ (comm f) refl ⟩
-            (α M ∘ map f) ∘ map g         ≈⟨ assoc ⟩
-            α M ∘ map f ∘ map g           ∎
+         ∘-comm-aux f g = cong₃ (glue (comm f) (comm g)) homomorphism
