@@ -12,21 +12,20 @@ private
 
 module Reasoning (𝓒 : Category o l e) where
    open Category 𝓒
-   open import Categories.Morphism.Reasoning 𝓒 hiding (glue)
-   -- open import Categories.Morphism.Reasoning 𝓒 using (glue) public
+   open import Categories.Morphism.Reasoning 𝓒
    open HomReasoning
    open Equiv
 
    -- create a commutative square from an equivalence
-   toSquare : ∀ {A B} {f g : A ⇒ B} → f ≈ g → CommutativeSquare 𝓒 f id id g
-   toSquare {_} {_} {f} {g} f≈g = begin
+   toSquareₕ : ∀ {A B} {f g : A ⇒ B} → f ≈ g → CommutativeSquare 𝓒 f id id g
+   toSquareₕ {_} {_} {f} {g} f≈g = begin
          id ∘ f   ≈⟨ identityˡ ⟩
          f        ≈⟨ f≈g ⟩
          g        ≈˘⟨ identityʳ ⟩
          g ∘ id   ∎
 
    toSquareᵥ : ∀ {A B} {a b : A ⇒ B} → a ≈ b → CommutativeSquare 𝓒 id a b id
-   toSquareᵥ p = sym (toSquare p)
+   toSquareᵥ p = sym (toSquareₕ p)
       
    transp : {A B C D : Obj} {f : A ⇒ B} {a : A ⇒ C} {b : B ⇒ D} {g : C ⇒ D}
           → CommutativeSquare 𝓒 f a b g → CommutativeSquare 𝓒 a f g b
@@ -60,17 +59,13 @@ module Reasoning (𝓒 : Category o l e) where
       g  ∘ a ≈⟨ ∘-resp-≈ˡ (sym p) ⟩
       g' ∘ a ∎
 
-   glue : {A₁ A₂ A₃ B₁ B₂ B₃ : Obj}
-        → {a : A₁ ⇒ A₂} {a′ : A₂ ⇒ A₃} {b : B₁ ⇒ B₂} {b′ : B₂ ⇒ B₃}
-        → {f : A₁ ⇒ B₁} {g : A₂ ⇒ B₂} {h : A₃ ⇒ B₃}
-        → CommutativeSquare 𝓒 g a′ b′ h
-        → CommutativeSquare 𝓒 f a b g
-        → CommutativeSquare 𝓒 f (a′ ∘ a) (b′ ∘ b) h
-   glue {a = a} {a′ = a′} {b = b} {b′ = b′} {f = f} {g = g} {h = h} sq-a sq-b = begin
-      (b′ ∘ b) ∘ f  ≈⟨ pullʳ sq-b ⟩
-      b′ ∘ (g ∘ a)  ≈⟨ pullˡ sq-a ⟩
-      (h ∘ a′) ∘ a  ≈⟨ assoc ⟩
-      h ∘ (a′ ∘ a)  ∎
+   glueᵥ : {A₁ A₂ A₃ B₁ B₂ B₃ : Obj}
+         → {a : A₁ ⇒ A₂} {a′ : A₂ ⇒ A₃} {b : B₁ ⇒ B₂} {b′ : B₂ ⇒ B₃}
+         → {f : A₁ ⇒ B₁} {g : A₂ ⇒ B₂} {h : A₃ ⇒ B₃}
+         → CommutativeSquare 𝓒 g a′ b′ h
+         → CommutativeSquare 𝓒 f a b g
+         → CommutativeSquare 𝓒 f (a′ ∘ a) (b′ ∘ b) h
+   glueᵥ = glue
 
    glueₕ : {A A' B B' C C' : Obj}
          → {a : A ⇒ A'} {b : B ⇒ B'} {c : C ⇒ C'}
