@@ -27,7 +27,6 @@ Polyfunctor {o = o} {I = I} C B = record
    ; F-resp-≈ = F-resp-≈-aux
    }
    where open Category (Sets o)
---         open Sets ? I
 
          F₁-aux : {V : Set o} {S : Set o}
                 → Sets o [ V , S ]
@@ -41,4 +40,4 @@ Polyfunctor {o = o} {I = I} C B = record
                       → {f g : Sets o [ V , S ]}
                       → Sets o [ f ≈ g ]
                       → Sets o [ F₁-aux f ≈ F₁-aux g ]
-         F-resp-≈-aux = {!   !}
+         F-resp-≈-aux r {i , _} = cong (i ,_) (fun-ext λ _ → r)
