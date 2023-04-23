@@ -15,30 +15,30 @@ open Eq using (_≡_; refl; sym; trans; cong)
 open import Categories.Category.Instance.Sets
 
 open import Axiom.Extensionality.Propositional using (Extensionality)
-postulate fun-ext : ∀ {f g} → Extensionality f g 
-
-private
-   variable
-      o l e : Level
+postulate fun-ext : ∀ {f g} → Extensionality f g
 
 
-
-Polyfunctor : {I : Set o} → (C : I → Set o) → (B : I → Set o) → Endofunctor ({! !})
-Polyfunctor {I = I} C B = record
+Polyfunctor : {o : Level} {I : Set o} → (C : I → Set o) → (B : I → Set o) → Endofunctor (Sets o)
+Polyfunctor {o = o} {I = I} C B = record
    { F₀ = λ S → Σ[ i ∈ I ] ((B i) → S) -- full definition would have (C i) x ...
    ; F₁ = F₁-aux
    ; identity = refl
    ; homomorphism = refl
-   ; F-resp-≈ = {!   !}
+   ; F-resp-≈ = F-resp-≈-aux
    }
-   where open Category (Sets {!   !})
+   where open Category (Sets o)
 --         open Sets ? I
 
-         F₁-aux : {B = V : Set {!  !}} {S : Set {! o  !}} →
-           Sets {!   !} [ V , S ] → 
-           Sets {!   !} [ 
-             Σ[ i ∈ I ] (B i → V) , 
-             Σ[ i ∈ I ] (B i → S)
-             ]
+         F₁-aux : {V : Set o} {S : Set o}
+                → Sets o [ V , S ]
+                → Sets o [ 
+                     Σ[ i ∈ I ] (B i → V) ,
+                     Σ[ i ∈ I ] (B i → S)
+                  ]
          F₁-aux f (i , g) = i , (f ∘ g)
-           
+
+         F-resp-≈-aux : {V : Set o} {S : Set o}
+                      → {f g : Sets o [ V , S ]}
+                      → Sets o [ f ≈ g ]
+                      → Sets o [ F₁-aux f ≈ F₁-aux g ]
+         F-resp-≈-aux = {!   !}
