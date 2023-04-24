@@ -8,7 +8,7 @@ The basic task is to:
 - [x] define `F`-coalgebras and morphisms (alrady in the categories library)
 - [x] show that they form a category
 - [x] define polynomial functors on `Set` in one variable
-- [ ] define final `F`-coalgebras in terms of their universal property
+- [x] define final `F`-coalgebras in terms of their universal property
 - [ ] show that polynomial functors have final coalgebras
 
 Possible extensions:
