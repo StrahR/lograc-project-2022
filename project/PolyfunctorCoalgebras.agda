@@ -22,16 +22,36 @@ open import FinalCoalgebras
 open import Polyfunctor
 
 module _ {o : Level} {I : Set o} (C B : I → Set o) where
-   PolyfunctorFinalCoalgebra : FinalCoalgebra (Polyfunctor C B)
+   module S = Category (Sets o)
+   P : Endofunctor (Sets o)
+   P = Polyfunctor C B
+   Pcat : Category (suc o) o o
+   Pcat = CoalgCat P
+   open Functor P
+   
+   PolyfunctorFinalCoalgebra : FinalCoalgebra P
    PolyfunctorFinalCoalgebra = record
-      { Z = record
-         { X = Σ[ i ∈ I ] C i
-         ; α = λ {(i , cᵢ) → i , (cᵢ , (λ _ → i , cᵢ))}
-         }
-      ; ! = record
-         { map  = {!   !}
-         ; comm = {!   !} }
+      { Z        = Z-aux
+      ; !        = !-aux
       ; !-unique = λ {record { map = map ; comm = comm }
                    → {!   !}}
       }
- 
+      where
+            Z-aux : Coalgebra P
+            Z-aux = record
+               { X = Σ[ i ∈ I ] C i
+               ; α = λ {(i , cᵢ) → i , (cᵢ , (λ _ → i , cᵢ))}
+               }
+            module C = Category Pcat
+            !-aux : {A : Coalgebra P}
+                  → Pcat [ A , Z-aux ]
+            !-aux {A} = record
+               { map  = {!   !}
+               ; comm = {!   !}
+               }
+               where open Coalgebra A
+                     map-aux : {!   !}
+                     map-aux = {!   !}
+
+
+
