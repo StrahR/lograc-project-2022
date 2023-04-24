@@ -1,4 +1,4 @@
-module Coalgebra where 
+module Coalgebras where 
 
 open import Level using (_⊔_; suc; Level)
 open import Categories.Category
