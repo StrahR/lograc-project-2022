@@ -46,12 +46,17 @@ module _ {o : Level} {I : Set o} (C B : I → Set o) where
             !-aux : {A : Coalgebra P}
                   → Pcat [ A , Z-aux ]
             !-aux {A} = record
-               { map  = {!   !}
+               { map  = map-aux
                ; comm = {!   !}
                }
                where open Coalgebra A
-                     map-aux : {!   !}
-                     map-aux = {!   !}
+                     open Coalgebra Z-aux renaming (X to Z; α to ζ)
+                     open Functor P renaming (F₀ to P₀; F₁ to P₁)
+                     map-aux : Sets o [ X , Z ]
+                     map-aux x = (λ (i , c , _) → (i , c)) (α x)
+                     
+                     comm-aux : {!   !}
+                     comm-aux = {!   !}
 
 
-
+ 
