@@ -5,7 +5,7 @@ module PolyfunctorCoalgebras where
 open import Level using (_⊔_; suc; Level)
 -- open import Category
 open import Categories.Category
-open import Data.Product using (Σ; Σ-syntax; _,_; _×_) 
+open import Data.Product using (Σ; Σ-syntax; _,_; _×_; map) 
 -- open import Categories.Category.CartesianClosed using (CartesianClosed) CCC doesn't have coproducts or something
 open import Categories.Functor using (Functor; Endofunctor; _∘F_)
 
@@ -15,9 +15,6 @@ open Eq using (_≡_; refl; sym; trans; cong)
 -- open import Categories.Category.BinaryProducts using (BinaryProducts)
 
 open import Categories.Category.Instance.Sets
-
--- open import Axiom.Extensionality.Propositional using (Extensionality)
--- postulate fun-ext : ∀ {f g} → Extensionality f g
 
 open import Coalgebras
 open import FinalCoalgebras
@@ -51,6 +48,14 @@ module _ {o : Level} {I : Set o} (C B : I → Set o) where
          tree : B (pr₁ root) → M-type C B
    open M-type public
 
+   M-map : {I₁ I₂ : Set o} {C₁ B₁ : I₁ → Set o} {C₂ B₂ : I₂ → Set o}
+         → (u : Sets o [ I₁ , I₂ ])
+         → (c : (i : I₁) → Sets o [ C₁ i , C₂ (u i) ])
+         → (b : (i : I₁) → Sets o [ B₁ i , B₂ (u i) ])
+         → M-type C₁ B₁ → M-type C₂ B₂
+   M-map u c b t .root    = {! map u c (root t) !}
+   M-map u c b t .tree bi = {!  !}
+
    Pt : (t : M-type C B) → P₀ (M-type C B)
    Pt t = pr₁ (root t) , (pr₂ (root t)) , (λ b → tree t b)
 
@@ -58,8 +63,7 @@ module _ {o : Level} {I : Set o} (C B : I → Set o) where
    PolyfunctorFinalCoalgebra = record
       { Z        = Z-aux
       ; !        = !-aux
-      ; !-unique = λ {record { map = map ; comm = comm }
-                   → {!   !}}
+      ; !-unique = !-unique-aux
       }
       where open Definitions using (CommutativeSquare)
             open import CommSqReasoning
@@ -77,5 +81,22 @@ module _ {o : Level} {I : Set o} (C B : I → Set o) where
                where open Coalgebra A
                      open Coalgebra Z-aux renaming (X to Z; α to ζ)
                      map-aux : Sets o [ X , Z ]
+                     -- map-aux x = inf (pr₁₂ (α x)) (λ b → map-aux (pr₃ (α x) b))
                      map-aux x .root   = pr₁₂ (α x)
                      map-aux x .tree b = map-aux (pr₃ (α x) b)
+
+            !-unique-aux : {X : Coalgebra P}
+                         → (f : Pcat [ X , Z-aux ])
+                         → Pcat [ !-aux ≈ f ]
+            !-unique-aux {X} record { map = f-map ; comm = f-comm } {x} =
+               {!   !}
+               -- begin
+               --    !-map x ≡⟨ {!   !} ⟩
+               --    -- inf (pr₁₂ (α x)) (λ b → !-map (pr₃ (α x) b)) ≡⟨ {!   !} ⟩
+               --    {!   !} ≡⟨ {!   !} ⟩
+               --    {!   !} ≡⟨ {!   !} ⟩
+               --    f-map x ∎
+               where open Coalgebra Z-aux renaming (X to Z; α to ζ)
+                     open Coalgebra X
+                     open Eq.≡-Reasoning
+                     open Coalg-hom !-aux renaming (map to !-map; comm to !-comm)
