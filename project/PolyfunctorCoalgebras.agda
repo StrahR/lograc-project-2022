@@ -86,7 +86,7 @@ module _ {o : Level} {I : Set o} (C B : I → Set o) where
                      -- comm-aux {x} with map-aux x | P₁ map-aux (α x) | α x in eq-αx
                      -- ... | p | q | r = {!   !}
                      -- ... | p₁ , p₂ | q₁ , q₂₁ , q₂₂ | r₁ , r₂₁ , r₂₂ rewrite eq-αx = cong (λ y → r₁ , r₂₁ , y) {!   !}
-                     comm-aux {x} = {!   !}
+                     comm-aux {x} = refl
                      -- comm-aux {x} = begin
                      --    (ζ ∘ map-aux) x    ≡⟨ {!   !} ⟩
                      --    {!   !}           ≡⟨ {!   !} ⟩
