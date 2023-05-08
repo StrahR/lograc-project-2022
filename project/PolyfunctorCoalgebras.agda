@@ -38,6 +38,10 @@ module _ {o : Level} {I : Set o} (C B : I → Set o) where
    pr₁ (fst , snd) = fst
    pr₂ : {A : Set o} {B : A → Set o} → (x : Σ[ a ∈ A ] B a) → B (pr₁ x)
    pr₂ (fst , snd) = snd
+   pr₁₂ : {A : Set o} {B C : A → Set o} → (x : Σ[ a ∈ A ] B a × C a) → Σ[ a ∈ A ] B a
+   pr₁₂ (fst , snd , trd) = fst , snd
+   pr₃ : {A : Set o} {B C : A → Set o} → (x : Σ[ a ∈ A ] B a × C a) → C (pr₁ x)
+   pr₃ (fst , snd , trd) = trd
 
    record M-type {I : Set o} (C B : I → Set o) : Set o where
       coinductive
@@ -73,7 +77,8 @@ module _ {o : Level} {I : Set o} (C B : I → Set o) where
                where open Coalgebra A
                      open Coalgebra Z-aux renaming (X to Z; α to ζ)
                      map-aux : Sets o [ X , Z ]
-                     map-aux x = {!   !}
+                     map-aux x .root   = pr₁₂ (α x)
+                     map-aux x .tree b = map-aux (pr₃ (α x) b)
 
                      open import Categories.Morphism.Reasoning (Sets o)
                      -- open S.HomReasoning
