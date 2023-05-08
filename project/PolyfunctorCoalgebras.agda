@@ -47,7 +47,7 @@ module _ {o : Level} {I : Set o} (C B : I → Set o) where
                   → Pcat [ A , Z-aux ]
             !-aux {A} = record
                { map  = map-aux
-               ; comm = {!   !}
+               ; comm = {! comm-aux  !}
                }
                where open Coalgebra A
                      open Coalgebra Z-aux renaming (X to Z; α to ζ)
