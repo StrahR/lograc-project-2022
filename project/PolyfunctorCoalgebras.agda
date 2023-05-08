@@ -81,15 +81,8 @@ module _ {o : Level} {I : Set o} (C B : I → Set o) where
                      map-aux x .tree b = map-aux (pr₃ (α x) b)
 
                      open import Categories.Morphism.Reasoning (Sets o)
-                     -- open S.HomReasoning
+                     
                      comm-aux : CommutativeSquare (Sets o) map-aux α ζ (P₁ map-aux)
-                     -- comm-aux {x} with map-aux x | P₁ map-aux (α x) | α x in eq-αx
-                     -- ... | p | q | r = {!   !}
-                     -- ... | p₁ , p₂ | q₁ , q₂₁ , q₂₂ | r₁ , r₂₁ , r₂₂ rewrite eq-αx = cong (λ y → r₁ , r₂₁ , y) {!   !}
                      comm-aux {x} = refl
-                     -- comm-aux {x} = begin
-                     --    (ζ ∘ map-aux) x    ≡⟨ {!   !} ⟩
-                     --    {!   !}           ≡⟨ {!   !} ⟩
-                     --    (P₁ map-aux ∘ α) x ∎
                         where open S
                               open Eq.≡-Reasoning
