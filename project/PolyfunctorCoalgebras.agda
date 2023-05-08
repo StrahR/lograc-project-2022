@@ -1,3 +1,5 @@
+{-# OPTIONS --guardedness #-}
+
 module PolyfunctorCoalgebras where
 
 open import Level using (_⊔_; suc; Level)
@@ -14,8 +16,8 @@ open Eq using (_≡_; refl; sym; trans; cong)
 
 open import Categories.Category.Instance.Sets
 
-open import Axiom.Extensionality.Propositional using (Extensionality)
-postulate fun-ext : ∀ {f g} → Extensionality f g
+-- open import Axiom.Extensionality.Propositional using (Extensionality)
+-- postulate fun-ext : ∀ {f g} → Extensionality f g
 
 open import Coalgebras
 open import FinalCoalgebras
@@ -27,8 +29,27 @@ module _ {o : Level} {I : Set o} (C B : I → Set o) where
    P = Polyfunctor C B
    Pcat : Category (suc o) o o
    Pcat = CoalgCat P
-   open Functor P
-   
+   open Functor P renaming (F₀ to P₀; F₁ to P₁)
+
+   -- data M-type {I : Set o} (C B : I → Set o) : Set (suc o) where
+   --    inf : (i : I) → C i × (B i → ∞ (M-type C B)) → M-type C B
+
+   pr₁ : {A : Set o} {B : A → Set o} → Σ[ a ∈ A ] B a → A
+   pr₁ (fst , snd) = fst
+   pr₂ : {A : Set o} {B : A → Set o} → (x : Σ[ a ∈ A ] B a) → B (pr₁ x)
+   pr₂ (fst , snd) = snd
+
+   record M-type {I : Set o} (C B : I → Set o) : Set o where
+      coinductive
+      constructor inf
+      field
+         root : Σ[ i ∈ I ] C i
+         tree : B (pr₁ root) → M-type C B
+   open M-type public
+
+   Pt : (t : M-type C B) → P₀ (M-type C B)
+   Pt t = pr₁ (root t) , (pr₂ (root t)) , (λ b → tree t b)
+
    PolyfunctorFinalCoalgebra : FinalCoalgebra P
    PolyfunctorFinalCoalgebra = record
       { Z        = Z-aux
@@ -36,27 +57,34 @@ module _ {o : Level} {I : Set o} (C B : I → Set o) where
       ; !-unique = λ {record { map = map ; comm = comm }
                    → {!   !}}
       }
-      where
+      where open Definitions using (CommutativeSquare)
+            open import CommSqReasoning
             Z-aux : Coalgebra P
             Z-aux = record
-               { X = Σ[ i ∈ I ] C i
-               ; α = λ {(i , cᵢ) → i , (cᵢ , (λ _ → i , cᵢ))}
+               { X = M-type C B
+               ; α = λ t → pr₁ (root t) , (pr₂ (root t)) , (λ b → tree t b)
                }
             module C = Category Pcat
-            !-aux : {A : Coalgebra P}
-                  → Pcat [ A , Z-aux ]
+            !-aux : {A : Coalgebra P} → Pcat [ A , Z-aux ]
             !-aux {A} = record
                { map  = map-aux
-               ; comm = {! comm-aux  !}
+               ; comm = comm-aux
                }
                where open Coalgebra A
                      open Coalgebra Z-aux renaming (X to Z; α to ζ)
-                     open Functor P renaming (F₀ to P₀; F₁ to P₁)
                      map-aux : Sets o [ X , Z ]
-                     map-aux x = (λ (i , c , _) → (i , c)) (α x)
-                     
-                     comm-aux : {!   !}
-                     comm-aux = {!   !}
+                     map-aux x = {!   !}
 
-
- 
+                     open import Categories.Morphism.Reasoning (Sets o)
+                     -- open S.HomReasoning
+                     comm-aux : CommutativeSquare (Sets o) map-aux α ζ (P₁ map-aux)
+                     -- comm-aux {x} with map-aux x | P₁ map-aux (α x) | α x in eq-αx
+                     -- ... | p | q | r = {!   !}
+                     -- ... | p₁ , p₂ | q₁ , q₂₁ , q₂₂ | r₁ , r₂₁ , r₂₂ rewrite eq-αx = cong (λ y → r₁ , r₂₁ , y) {!   !}
+                     comm-aux {x} = {!   !}
+                     -- comm-aux {x} = begin
+                     --    (ζ ∘ map-aux) x    ≡⟨ {!   !} ⟩
+                     --    {!   !}           ≡⟨ {!   !} ⟩
+                     --    (P₁ map-aux ∘ α) x ∎
+                        where open S
+                              open Eq.≡-Reasoning

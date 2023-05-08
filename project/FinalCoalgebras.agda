@@ -15,7 +15,6 @@ record FinalCoalgebra {C : Category o l e} (F : Endofunctor C) : Set (o ⊔ l �
    eta-equality
    module C = Category C
    open Functor F
-   -- open Category (CoalgCat F)
    open module CC = Category (CoalgCat F)
    open Coalgebra
    field
@@ -33,4 +32,3 @@ record FinalCoalgebra {C : Category o l e} (F : Endofunctor C) : Set (o ⊔ l �
    
    automf-id : (f : Z ⇒ Z) → f ≈ id
    automf-id f = !-unique₂ {Z} {f} {id}
- 
