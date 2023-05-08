@@ -72,17 +72,10 @@ module _ {o : Level} {I : Set o} (C B : I → Set o) where
             !-aux : {A : Coalgebra P} → Pcat [ A , Z-aux ]
             !-aux {A} = record
                { map  = map-aux
-               ; comm = comm-aux
+               ; comm = refl
                }
                where open Coalgebra A
                      open Coalgebra Z-aux renaming (X to Z; α to ζ)
                      map-aux : Sets o [ X , Z ]
                      map-aux x .root   = pr₁₂ (α x)
                      map-aux x .tree b = map-aux (pr₃ (α x) b)
-
-                     open import Categories.Morphism.Reasoning (Sets o)
-                     
-                     comm-aux : CommutativeSquare (Sets o) map-aux α ζ (P₁ map-aux)
-                     comm-aux {x} = refl
-                        where open S
-                              open Eq.≡-Reasoning

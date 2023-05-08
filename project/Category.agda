@@ -56,10 +56,5 @@ record Coa-homo {o l : Level} {S : Category o l} {F : Functor S S} (A : Coalgebr
 
         f-commutes : B.α S.∘ f ≡ (F.F-mor f) S.∘ A.α
 
-{- Coalgebra : {o l : Level} (S : Category o l) (F : Endofunctor S) → Category o l
-Coalgebra A = {
-    Obj = 
-}
--}
         
     

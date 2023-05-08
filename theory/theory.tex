@@ -114,13 +114,12 @@
     Polynomial functors preserve colimits
 
     \begin{example}
-        The terminal object for \(p\)-Coalgebras is 
-        \[ \sum_{i \in \Gamma} C_i\]
+        The terminal object for \(p\)-Coalgebras are \(M\) types --- trees. An element from the terminal object is a specific tree, where each node has a carrier set \(C_i\) and children indexed by \(B_i\). The children are again, nodes.
+
+        Build such trees coinductively, because they are not necessarily well-founded.
     \end{example}
     \begin{proof}
-        The map takes any \(p\)-Coalgebra \((X, \alpha: X\to pX)\) to the one above.
-        
-        If \(x : X\) is mapped to \(()\) by \(\alpha\), this gets mapped to \(
+
     \end{proof}
         
 \end{document}
