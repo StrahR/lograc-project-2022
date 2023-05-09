@@ -29,7 +29,7 @@ module _ {C : Category o l e} where
       open Coalgebra A
       open Coalgebra B renaming (X to Y; α to β)
       field
-         map : X ⇒ Y
+         map  : X ⇒ Y
          comm : CommutativeSquare C map α β (F₁ map)
 
    CoalgCat : (F : Endofunctor C) → Category (o ⊔ l) (l ⊔ e) e
@@ -58,7 +58,7 @@ module _ {C : Category o l e} where
             id-comm-aux : {A : Coalgebra F}
                         → CommutativeSquare C id→ (α A) (α A) (F₁ id→)
             id-comm-aux = cong₄ (toSquareᵥ refl) identity
-            
+
             ∘-comm-aux : {K L M : Coalgebra F}
                      → (f : Coalg-hom L M) → (g : Coalg-hom K L)
                      → CommutativeSquare C (map f ∘ map g) (α K) (α M) (F₁ (map f ∘ map g))

@@ -20,7 +20,7 @@ postulate fun-ext : ∀ {f g} → Extensionality f g
 
 Polyfunctor : {o : Level} {I : Set o} → (C : I → Set o) → (B : I → Set o) → Endofunctor (Sets o)
 Polyfunctor {o = o} {I = I} C B = record
-   { F₀ = λ S → Σ[ i ∈ I ] ((C i) × ((B i) → S)) 
+   { F₀ = λ S → Σ[ i ∈ I ] ((C i) × ((B i) → S))
    ; F₁ = F₁-aux
    ; identity = refl
    ; homomorphism = refl
@@ -33,7 +33,7 @@ Polyfunctor {o = o} {I = I} C B = record
                      Σ[ i ∈ I ] ((C i) × ((B i) → V)) ,
                      Σ[ i ∈ I ] ((C i) × ((B i) → S))
                   ]
-         F₁-aux f (i , fst , snd) = (i , fst , f ∘ snd) 
+         F₁-aux f (i , fst , snd) = (i , fst , f ∘ snd)
 
          F-resp-≈-aux : {V : Set o} {S : Set o}
                       → {f g : Sets o [ V , S ]}
