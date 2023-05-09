@@ -44,6 +44,7 @@ module _ {o : Level} {I : Set o} (C B : I → Set o) where
    pr₃ (fst , snd , trd) = trd
 
    record M-type {I : Set o} (C B : I → Set o) : Set o where
+      -- eta-equality
       coinductive
       constructor inf
       field
@@ -71,10 +72,17 @@ module _ {o : Level} {I : Set o} (C B : I → Set o) where
    --       root-≡₁ : pr₁ (root t) ≡ pr₁ (root u)
    --       root-≡ : root t ≡ root u
    --       tree-≅ : (b : B (proj₁ (root t))) → tree t b ≅ tree u b
+
+   transp : {A : Set o} {B : A → Set o} {a a' : A}
+          → (p : a ≡ a')
+          → B a → B a'
+   transp refl = λ z → z
+
    postulate
       M-ext : {t u : M-type C B}
-            → root t ≡ root u
-            → tree t ≅ tree u
+            → (p : root t ≡ root u)
+            → ((b : B (proj₁ (root t))) → tree t b ≡ tree u (transp {B = B} (cong proj₁ p) b))
+            -- → tree t ≅ tree u
             → t ≡ u
    -- M-ext p q = {!   !}
 
@@ -114,12 +122,12 @@ module _ {o : Level} {I : Set o} (C B : I → Set o) where
                      map-aux x .root   = pr₁₂ (α x)
                      map-aux x .tree b = map-aux (pr₃ (α x) b)
 
-            !-unique-aux : {X : Coalgebra P}
-                         → (f : Pcat [ X , Z-aux ])
+            !-unique-aux : {Xalg : Coalgebra P}
+                         → (f : Pcat [ Xalg , Z-aux ])
                          → Pcat [ !-aux ≈ f ]
-            !-unique-aux {X} record { map = f-map ; comm = f-comm } {x} =
+            !-unique-aux {Xalg} record { map = f-map ; comm = f-comm } {x} =
+               -- {!   !}
                M-ext root-aux tree-aux
-
                -- begin
                --    !-map x ≡⟨ {!   !} ⟩
                --    -- inf (pr₁₂ (α x)) (λ b → !-map (pr₃ (α x) b)) ≡⟨ {!   !} ⟩
@@ -127,36 +135,66 @@ module _ {o : Level} {I : Set o} (C B : I → Set o) where
                --    {!   !} ≡⟨ {!   !} ⟩
                --    f-map x ∎
                where open Coalgebra Z-aux renaming (X to Z; α to ζ)
-                     open Coalgebra X
-                     open Coalg-hom !-aux renaming (map to !-map; comm to !-comm)
-                     
+                     open Coalgebra Xalg
+                     open Coalg-hom (!-aux {Xalg}) renaming (map to !-map; comm to !-comm)
+
                      root-aux : root (!-map x) ≡ root (f-map x)
-                     root-aux = begin
+                     root-aux =
+                        begin
                         root (!-map x)   ≡⟨ refl ⟩
                         pr₁₂ (α x)      ≡˘⟨ ,-injectiveˡ (cong assocˡ f-comm) ⟩
                         root (f-map x) ∎
                         where open Reasoning (Sets o)
                               open Eq.≡-Reasoning
 
-                     tree-aux : tree (!-map x) ≅ tree (f-map x)
-                     tree-aux = begin
-                        tree (!-map x) ≅⟨ hrefl ⟩
-                        (λ b → !-map (proj₂ (proj₂ (α x)) b)) ≅⟨ {!   !} ⟩
-                        {!   !}       ≅⟨ {!   !} ⟩
-                        {!   !}       ≅⟨ {!   !} ⟩
-                        proj₂ (proj₂ (P₁ f-map (α x))) ≅˘⟨ hcong (λ y → proj₂ (proj₂ y)) (HEq.≡-to-≅ root-aux-aux) ⟩
-                        proj₂ (proj₂ (ζ (f-map x)))    ≅⟨ hrefl ⟩
-                        proj₂ (proj₂ ((λ t → pr₁ (root t) , (pr₂ (root t)) , (λ b → tree t b)) (f-map x)))    ≅⟨ {!   !} ⟩
-                        -- proj₂ (proj₂ (pr₁ (root (f-map x)) , pr₂ (root (f-map x)) , tree (f-map x)))   ≅⟨ {!   !} ⟩
-                        tree (f-map x) ∎
-                        where open HEq.≅-Reasoning
+
+                     tree-aux : (b : B (proj₁ (root (!-map x))))
+                              → tree (!-map x) b ≡ tree (f-map x) (transp {B = B} (cong proj₁ root-aux) b)
+                     tree-aux b = begin
+                        tree (!-map x) b                            ≡⟨ refl ⟩
+                        !-map (pr₃ (α x) b)                         ≡⟨ sym M-eta ⟩
+                        inf
+                           (pr₁₂ (α (pr₃ (α x) b)))
+                           (λ b′ → !-map (pr₃ (α (pr₃ (α x) b)) b′)) ≡⟨ M-ext tree-root-aux tree-tree-aux ⟩
+                        inf
+                           (root (pr₃ (P₁ f-map (α x)) b''))
+                           (tree (pr₃ (P₁ f-map (α x)) b''))        ≡⟨ M-eta ⟩
+                        pr₃ (P₁ f-map (α x)) b''                    ≡⟨ f-comm-aux ⟩
+                        pr₃ (ζ (f-map x)) b'                        ≡⟨ refl ⟩
+                        tree (f-map x) b'                           ∎
+                     -- tree-aux = begin
+                     --    tree (!-map x) ≅⟨ hrefl ⟩
+                     --    (λ b → !-map (proj₂ (proj₂ (α x)) b)) ≅⟨ {!   !} ⟩
+                     --    {!   !}       ≅⟨ {!   !} ⟩
+                     --    {!   !}       ≅⟨ {!   !} ⟩
+                     --    proj₂ (proj₂ (P₁ f-map (α x))) ≅˘⟨ hcong (λ y → proj₂ (proj₂ y)) (HEq.≡-to-≅ root-aux-aux) ⟩
+                     --    proj₂ (proj₂ (ζ (f-map x)))    ≅⟨ hrefl ⟩
+                     --    proj₂ (proj₂ ((λ t → pr₁ (root t) , (pr₂ (root t) , tree t)) (f-map x)))    ≅⟨ hrefl ⟩
+                     --    -- proj₂ (proj₂ (pr₁ (root (f-map x)) , pr₂ (root (f-map x)) , tree (f-map x)))   ≅⟨ {!   !} ⟩
+                     --    tree (f-map x) ∎
+                        where open Eq.≡-Reasoning
+                              b'  = transp {B = B} (cong proj₁      root-aux)  b
+                              b'' = transp {B = B} (cong proj₁ (sym root-aux)) b'
+
+                              postulate
+                                 f-comm-aux : pr₃ (P₁ f-map (α x)) b'' ≡ pr₃ (ζ (f-map x)) b'
+                                 M-eta : {t : M-type C B} → inf (root t) (tree t) ≡ t
 
                               zfx = ζ (f-map x)
                               pfax = P₁ f-map (α x)
                               root-aux-aux : zfx ≡ pfax
                               root-aux-aux = f-comm
 
+                              tree-root-aux : pr₁₂ (α (pr₃ (α x) b)) ≡ root (pr₃ (P₁ f-map (α x)) b'')
+                              tree-root-aux = {!   !}
+
+                              tree-tree-aux : (b′ : B (proj₁ (α (pr₃ (α x) b))))
+                                            → !-map (pr₃ (α (pr₃ (α x) b)) b′)
+                                            ≡ tree (pr₃ (P₁ f-map (α x)) b'') (transp {B = B} (cong proj₁ tree-root-aux) b′)
+                              tree-tree-aux b′ = {!   !}
+                                 where b′′ = transp {B = B} (cong proj₁ tree-root-aux) b′
+
                      -- M-ext : root (!-map x) ≡ root (f-map x)
                      --       → tree (!-map x) ≡ tree (f-map x)
                      --       → !-map x ≡ f-map x
-                     -- M-ext p q = {!   !}      
+                     -- M-ext p q = {!   !}        
