@@ -29,6 +29,6 @@ record FinalCoalgebra {C : Category o l e} (F : Endofunctor C) : Set (o ⊔ l �
       ! ≈⟨  !-unique g ⟩
       g ∎
       where open HomReasoning
-   
+
    automf-id : (f : Z ⇒ Z) → f ≈ id
    automf-id f = !-unique₂ {Z} {f} {id}

@@ -26,7 +26,7 @@ module Reasoning (𝓒 : Category o l e) where
 
    toSquareᵥ : ∀ {A B} {a b : A ⇒ B} → a ≈ b → CommutativeSquare 𝓒 id a b id
    toSquareᵥ p = sym (toSquareₕ p)
-      
+
    transp : {A B C D : Obj} {f : A ⇒ B} {a : A ⇒ C} {b : B ⇒ D} {g : C ⇒ D}
           → CommutativeSquare 𝓒 f a b g → CommutativeSquare 𝓒 a f g b
    transp {f = f} {a} {b} {g} p = sym p
