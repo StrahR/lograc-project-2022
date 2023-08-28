@@ -1,5 +1,3 @@
-{-# OPTIONS --guardedness #-}
-
 module PolyfunctorCoalgebras where
 
 open import Level using (_⊔_; suc; Level)
@@ -20,10 +18,6 @@ open import Data.List
 
 import Relation.Binary.PropositionalEquality as Eq
 open Eq using (_≡_; refl; sym; trans; cong; resp)
--- import Relation.Binary.HeterogeneousEquality as HEq
--- open HEq using (_≅_) renaming (refl to hrefl; sym to hsym; trans to htrans; cong to hcong)
-
--- open import Categories.Category.BinaryProducts using (BinaryProducts)
 
 open import Categories.Category.Instance.Sets
 
@@ -57,9 +51,6 @@ module _ {o : Level} (C B : Set o) where
             Z-aux = record
                { X = List B → C
                ; α = λ f → f [] , λ b σ → f (b ∷ σ)
-               --proj₁ (f [])
-                        --  , {!   !} --proj₂ (f [])
-                        --  , {!   !} --(λ b σ → f ((proj₁ (f []), b) ∷ σ))
                }
 
             !-aux : {A : Coalgebra P} → Pcat [ A , Z-aux ]
@@ -84,22 +75,14 @@ module _ {o : Level} (C B : Set o) where
                      !-unique-aux-aux : (x : X)
                                       → (σ : List B)
                                       → !-map x σ ≡ f-map x σ
-                     !-unique-aux-aux x [] = begin
-                        !-map x []              ≡⟨ refl ⟩
-                        proj₁ (α x)             ≡˘⟨ refl ⟩
-                        proj₁ (P₁ f-map (α x))  ≡˘⟨ cong proj₁ f-comm ⟩
-                        proj₁ (ζ (f-map x))     ≡˘⟨ refl ⟩
-                        f-map x [] ∎
-                        where open Reasoning (Sets o)
-                              open Eq.≡-Reasoning
+                     !-unique-aux-aux x [] = sym (cong proj₁ f-comm)
 
                      !-unique-aux-aux x (b ∷ σ) = begin
-                        !-map x (b ∷ σ) ≡˘⟨ refl ⟩
-                        !-map (proj₂ (α x) b) σ ≡⟨ !-unique-aux-aux (proj₂ (α x) b) σ ⟩
-                        f-map (proj₂ (α x) b) σ ≡˘⟨ refl ⟩
-                        proj₂ (P₁ f-map (α x) ) b σ
-                           ≡˘⟨ cong (λ e → proj₂ e b σ) f-comm ⟩
-                        proj₂ (ζ (f-map x)) b σ ≡˘⟨ refl ⟩
-                        f-map x (b ∷ σ) ∎
+                        !-map x (b ∷ σ)              ≡˘⟨ refl ⟩
+                        !-map (proj₂ (α x) b) σ      ≡⟨ !-unique-aux-aux (proj₂ (α x) b) σ ⟩
+                        f-map (proj₂ (α x) b) σ      ≡˘⟨ refl ⟩
+                        proj₂ (P₁ f-map (α x) ) b σ  ≡˘⟨ cong (λ e → proj₂ e b σ) f-comm ⟩
+                        proj₂ (ζ (f-map x)) b σ      ≡˘⟨ refl ⟩
+                        f-map x (b ∷ σ)              ∎
                         where open Reasoning (Sets o)
                               open Eq.≡-Reasoning
