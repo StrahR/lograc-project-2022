@@ -64,3 +64,26 @@ Polyfunctor-simpl {o = o} {I = I} B = record
                       → Sets o [ f ≈ g ]
                       → Sets o [ F₁-aux f ≈ F₁-aux g ]
          F-resp-≈-aux r {i , _} = cong (i ,_) (fun-ext λ _ → r)
+
+Polyfunctor-simpl-simpl : {o : Level} → (C B : Set o) → Endofunctor (Sets o)
+Polyfunctor-simpl-simpl {o = o} C B = record
+   { F₀ = λ S → (C × (B → S))
+   ; F₁ = F₁-aux
+   ; identity = refl
+   ; homomorphism = refl
+   ; F-resp-≈ = F-resp-≈-aux
+   }
+   where open Category (Sets o) 
+         F₁-aux : {V : Set o} {S : Set o}
+                → Sets o [ V , S ]
+                → Sets o [ 
+                     (C × (B → V)) ,
+                     (C × (B → S))
+                  ]
+         F₁-aux f (fst , snd) = (fst , f ∘ snd)
+
+         F-resp-≈-aux : {V : Set o} {S : Set o}
+                      → {f g : Sets o [ V , S ]}
+                      → Sets o [ f ≈ g ]
+                      → Sets o [ F₁-aux f ≈ F₁-aux g ]
+         F-resp-≈-aux {f} {g} r {fst , _} = cong (fst ,_ ) (fun-ext (λ _ → r)) 

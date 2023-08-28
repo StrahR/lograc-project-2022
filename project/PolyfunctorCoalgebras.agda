@@ -1,3 +1,4 @@
+{-# OPTIONS --guardedness #-}
 
 module PolyfunctorCoalgebras where
 
@@ -12,7 +13,7 @@ open import Categories.Functor using (Functor; Endofunctor; _∘F_)
 open import Data.List
   using
   (List
-  ; []; _∷_
+  ; []; _∷_; _∷ʳ_
   ; sum; map; take; reverse; _++_; drop
   )
 
@@ -29,23 +30,20 @@ open import Categories.Category.Instance.Sets
 open import Coalgebras
 open import FinalCoalgebras
 open import Polyfunctor
+   renaming (Polyfunctor-simpl-simpl to Poly)
 
-module _ {o : Level} {I : Set o} (C B : I → Set o) where
+module _ {o : Level} (C B : Set o) where
    module S = Category (Sets o)
    P : Endofunctor (Sets o)
-   P = Polyfunctor C B
+   P = Poly C B
    Pcat : Category (suc o) o o
    Pcat = CoalgCat P
    open Functor P renaming (F₀ to P₀; F₁ to P₁)
-
-   -- data M-type {I : Set o} (C B : I → Set o) : Set (suc o) where
-   --    inf : (i : I) → C i × (B i → ∞ (M-type C B)) → M-type C B
 
    pr₁₂ : {A : Set o} {B C : A → Set o} → (x : Σ[ a ∈ A ] B a × C a) → Σ[ a ∈ A ] B a
    pr₁₂ (fst , snd , trd) = fst , snd
    pr₃ : {A : Set o} {B C : A → Set o} → (x : Σ[ a ∈ A ] B a × C a) → C (proj₁ x)
    pr₃ (fst , snd , trd) = trd
-
 
    PolyfunctorFinalCoalgebra : FinalCoalgebra P
    PolyfunctorFinalCoalgebra = record
@@ -56,7 +54,52 @@ module _ {o : Level} {I : Set o} (C B : I → Set o) where
       where open Definitions using (CommutativeSquare)
             open import CommSqReasoning
             Z-aux : Coalgebra P
-            Z-aux = record 
-            { X = List (Σ [ i ∈ I ] B i) → Σ [ i ∈ I ] C i
-            ; α = 
-            }
+            Z-aux = record
+               { X = List B → C
+               ; α = λ f → f [] , λ b σ → f (b ∷ σ)
+               --proj₁ (f [])
+                        --  , {!   !} --proj₂ (f [])
+                        --  , {!   !} --(λ b σ → f ((proj₁ (f []), b) ∷ σ))
+               }
+
+            !-aux : {A : Coalgebra P} → Pcat [ A , Z-aux ]
+            !-aux {A} = record
+               { map  = map-aux
+               ; comm = refl
+               }
+               where open Coalgebra A
+                     open Coalgebra Z-aux renaming (X to Z; α to ζ)
+                     map-aux : Sets o [ X , Z ]
+                     map-aux x []      = proj₁ (α x)
+                     map-aux x (b ∷ σ) = map-aux (proj₂ (α x) b) σ
+
+            !-unique-aux : {A : Coalgebra P}
+                         → (f : Pcat [ A , Z-aux ])
+                         → Pcat [ !-aux ≈ f ]
+            !-unique-aux {A} record { map = f-map ; comm = f-comm } {x} = fun-ext (!-unique-aux-aux x)
+               where open Coalgebra A
+                     open Coalgebra Z-aux renaming (X to Z; α to ζ)
+                     open Coalg-hom !-aux renaming (map to !-map; comm to !-comm)
+
+                     !-unique-aux-aux : (x : X)
+                                      → (σ : List B)
+                                      → !-map x σ ≡ f-map x σ
+                     !-unique-aux-aux x [] = begin
+                        !-map x []              ≡⟨ refl ⟩
+                        proj₁ (α x)             ≡˘⟨ refl ⟩
+                        proj₁ (P₁ f-map (α x))  ≡˘⟨ cong proj₁ f-comm ⟩
+                        proj₁ (ζ (f-map x))     ≡˘⟨ refl ⟩
+                        f-map x [] ∎
+                        where open Reasoning (Sets o)
+                              open Eq.≡-Reasoning
+
+                     !-unique-aux-aux x (b ∷ σ) = begin
+                        !-map x (b ∷ σ) ≡˘⟨ refl ⟩
+                        !-map (proj₂ (α x) b) σ ≡⟨ !-unique-aux-aux (proj₂ (α x) b) σ ⟩
+                        f-map (proj₂ (α x) b) σ ≡˘⟨ refl ⟩
+                        proj₂ (P₁ f-map (α x) ) b σ
+                           ≡˘⟨ cong (λ e → proj₂ e b σ) f-comm ⟩
+                        proj₂ (ζ (f-map x)) b σ ≡˘⟨ refl ⟩
+                        f-map x (b ∷ σ) ∎
+                        where open Reasoning (Sets o)
+                              open Eq.≡-Reasoning
