@@ -9,7 +9,7 @@ The basic task is to:
 - [x] show that they form a category
 - [x] define polynomial functors on `Set` in one variable
 - [x] define final `F`-coalgebras in terms of their universal property
-- [ ] show that polynomial functors have final coalgebras
+- [x] show that polynomial functors have final coalgebras
 
 Possible extensions:
 
