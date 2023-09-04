@@ -1,19 +1,20 @@
-{-# OPTIONS --guardedness #-}
+{-# OPTIONS --guardedness --with-K #-}
 
-module PolyfunctorCoalgebras where
+module PolyfunctorCoalgebras-old where
 
 open import Level using (_⊔_; suc; Level)
 -- open import Category
 open import Categories.Category
 open import Data.Product using (Σ; Σ-syntax; _,_; _×_; map; proj₁; proj₂; assocˡ)
-open import Data.Product.Properties using (,-injectiveˡ; ,-injectiveʳ)
+open import Data.Product.Properties using (,-injectiveˡ; ,-injectiveʳ-≡; ,-injectiveʳ-UIP)
 -- open import Categories.Category.CartesianClosed using (CartesianClosed) CCC doesn't have coproducts or something
 open import Categories.Functor using (Functor; Endofunctor; _∘F_)
 
 import Relation.Binary.PropositionalEquality as Eq
-open Eq using (_≡_; refl; sym; trans; cong)
-import Relation.Binary.HeterogeneousEquality as HEq
-open HEq using (_≅_) renaming (refl to hrefl; sym to hsym; trans to htrans; cong to hcong)
+open Eq using (_≡_; refl; sym; trans; cong; cong-app; subst; resp)
+open import Relation.Binary.PropositionalEquality.Properties using (subst-subst; subst-subst-sym; subst-sym-subst)
+-- import Relation.Binary.HeterogeneousEquality as HEq
+-- open HEq using (_≅_) renaming (refl to hrefl; sym to hsym; trans to htrans; cong to hcong)
 
 -- open import Categories.Category.BinaryProducts using (BinaryProducts)
 
@@ -21,142 +22,156 @@ open import Categories.Category.Instance.Sets
 
 open import Coalgebras
 open import FinalCoalgebras
-open import Polyfunctor
+open import Polyfunctor renaming (Polyfunctor-simpl to Poly)
 
-module _ {o : Level} {I : Set o} (C B : I → Set o) where
+module _ {o : Level} {I : Set o} (B : I → Set o) where
    module S = Category (Sets o)
    P : Endofunctor (Sets o)
-   P = Polyfunctor C B
+   P = Poly B
    Pcat : Category (suc o) o o
    Pcat = CoalgCat P
    open Functor P renaming (F₀ to P₀; F₁ to P₁)
 
-   -- data M-type {I : Set o} (C B : I → Set o) : Set (suc o) where
-   --    inf : (i : I) → C i × (B i → ∞ (M-type C B)) → M-type C B
-
-   pr₁ : {A : Set o} {B : A → Set o} → Σ[ a ∈ A ] B a → A
-   pr₁ (fst , snd) = fst
-   pr₂ : {A : Set o} {B : A → Set o} → (x : Σ[ a ∈ A ] B a) → B (pr₁ x)
-   pr₂ (fst , snd) = snd
-   pr₁₂ : {A : Set o} {B C : A → Set o} → (x : Σ[ a ∈ A ] B a × C a) → Σ[ a ∈ A ] B a
-   pr₁₂ (fst , snd , trd) = fst , snd
-   pr₃ : {A : Set o} {B C : A → Set o} → (x : Σ[ a ∈ A ] B a × C a) → C (pr₁ x)
-   pr₃ (fst , snd , trd) = trd
-
-   record M-type {I : Set o} (C B : I → Set o) : Set o where
+   record M-type : Set o where
       coinductive
-      constructor inf
+      -- constructor inf
       field
-         root : Σ[ i ∈ I ] C i
-         tree : B (pr₁ root) → M-type C B
+         root : I
+         tree : B root → M-type
    open M-type public
 
-   -- Can't define this without preimages of b
-   -- M-map : {I₁ I₂ : Set o} {C₁ B₁ : I₁ → Set o} {C₂ B₂ : I₂ → Set o}
-   --       → (u : Sets o [ I₁ , I₂ ])
-   --       → (c : (i : I₁) → Sets o [ C₁ i , C₂ (u i) ])
-   --       → (b : (i : I₁) → Sets o [ B₁ i , B₂ (u i) ])
-   --       → M-type C₁ B₁ → M-type C₂ B₂
-   -- M-map u c b t .root    = (u i) , (c i ci)
-   --    where i  = pr₁ (root t)
-   --          ci = pr₂ (root t)
-   -- M-map u c b t .tree bi = M-map u c b {!  tree t  !}
-   --    where i  = pr₁ (root t)
-   --          ci = pr₂ (root t)
-   --          b' = pr₁ (Σ[ b' ∈ B₁ i ] b b' ≡ )
+   record _≅_ (t u : M-type) : Set o where
+      coinductive
+      field
+         root-≡ : root t ≡ root u
+         tree-≅ : (b : B (root t)) → tree t b ≅ tree u (subst B root-≡ b)
 
-   -- record _≅_ {I : Set o} {C B : I → Set o} (t : M-type C B) (u : M-type C B) : Set o where
-   --    coinductive
-   --    field
-   --       root-≡₁ : pr₁ (root t) ≡ pr₁ (root u)
-   --       root-≡ : root t ≡ root u
-   --       tree-≅ : (b : B (proj₁ (root t))) → tree t b ≅ tree u b
-   postulate
-      M-ext : {t u : M-type C B}
-            → root t ≡ root u
-            → tree t ≅ tree u
-            → t ≡ u
-   -- M-ext p q = {!   !}
+   postulate M-ext : {t u : M-type} → t ≅ u → t ≡ u
 
-   -- Pt : (i : I) → (t : M-type i (C i) (B i)) → P₀ (M-type i (C i) (B i))
-   -- Pt i t = i , root t , tree t
-                     
-                     -- M-ext : root (!-map x) ≡ root (f-map x)
-                     --       → tree (!-map x) ≡ tree (f-map x)
-                     --       → !-map x ≡ f-map x
-                     -- M-ext p q = {!   !}
-   Pt : (t : M-type C B) → P₀ (M-type C B)
-   Pt t = pr₁ (root t) , (pr₂ (root t)) , (λ b → tree t b)
+   open _≅_ public
+   bisim-refl : {t : M-type} → t ≅ t
+   bisim-refl .root-≡   = refl
+   bisim-refl .tree-≅ b = bisim-refl
 
+   ≡-to-≅ : {t u : M-type} → t ≡ u → t ≅ u
+   ≡-to-≅ refl = bisim-refl
+
+   bisim-transʳ : {t u v : M-type} → t ≅ u → u ≡ v → t ≅ v
+   bisim-transʳ p refl = p
+   bisim-transˡ : {t u v : M-type} → t ≡ u → u ≅ v → t ≅ v
+   bisim-transˡ refl p = p
+   bisim-trans : {t u v : M-type} → t ≅ u → u ≅ v → t ≅ v
+   bisim-trans             p q .root-≡   = trans (root-≡ p) (root-≡ q)
+   bisim-trans {t} {u} {v} p q .tree-≅ b =
+      bisim-trans
+         (tree-≅ p b)
+         (bisim-transʳ
+            (tree-≅ q (subst B (root-≡ p) b))
+            (cong (λ e → tree v e) (subst-subst (root-≡ p))))
+
+   bisim-sym : {t u : M-type} → t ≅ u → u ≅ t
+   bisim-sym         p .root-≡   = sym (root-≡ p)
+   bisim-sym {t} {u} p .tree-≅ b =
+      bisim-sym (bisim-transʳ
+            (tree-≅ p (subst B (sym (root-≡ p)) b))
+            (cong (λ e → tree u e) (subst-subst-sym (root-≡ p))))
+
+   module ≅-Reasoning where
+
+      infix  3 _∎
+      infixr 2 _≅⟨⟩_ step-≅ step-≅̆
+      infixr 2 step-≡ step-≡̆
+      infix  1 begin_
+
+      begin_ : ∀{x y : M-type} → x ≅ y → x ≅ y
+      begin_ x≅y = x≅y
+
+      _≅⟨⟩_ : ∀ (x {y} : M-type) → x ≅ y → x ≅ y
+      _ ≅⟨⟩ x≅y = x≅y
+
+      step-≅ : ∀ (x {y z} : M-type) → y ≅ z → x ≅ y → x ≅ z
+      step-≅ _ y≅z x≅y = bisim-trans x≅y y≅z
+
+      step-≅̆ : ∀ (x {y z} : M-type) → y ≅ z → y ≅ x → x ≅ z
+      step-≅̆ _ y≅z y≅x = bisim-trans (bisim-sym y≅x) y≅z
+
+      _∎ : ∀ (x : M-type) → x ≅ x
+      _∎ _ = bisim-refl
+
+      syntax step-≅ x y≅z x≅y = x ≅⟨ x≅y ⟩ y≅z
+      syntax step-≅̆ x y≅z y≅x = x ≅̆⟨ y≅x ⟩ y≅z
+
+      step-≡ : ∀ (x {y z} : M-type) → y ≅ z → x ≡ y → x ≅ z
+      step-≡ _ y≅z x≡y = bisim-transˡ x≡y y≅z
+
+      step-≡̆ : ∀ (x {y z} : M-type) → y ≅ z → y ≡ x → x ≅ z
+      step-≡̆ _ y≅z y≡x = bisim-transˡ (sym y≡x) y≅z
+
+      syntax step-≡ x y≅z x≡y = x ≡⟨ x≡y ⟩ y≅z
+      syntax step-≡̆ x y≅z y≡x = x ≡̆⟨ y≡x ⟩ y≅z
+
+
+   -- {-# NON_TERMINATING #-}
    PolyfunctorFinalCoalgebra : FinalCoalgebra P
    PolyfunctorFinalCoalgebra = record
       { Z        = Z-aux
       ; !        = !-aux
       ; !-unique = !-unique-aux
       }
-      where open Definitions using (CommutativeSquare)
-            open import CommSqReasoning
-            Z-aux : Coalgebra P
-            Z-aux = record
-               { X = M-type C B
-               ; α = λ t → pr₁ (root t) , (pr₂ (root t)) , (λ b → tree t b)
-               }
-            module C = Category Pcat
-            !-aux : {A : Coalgebra P} → Pcat [ A , Z-aux ]
-            !-aux {A} = record
+      where 
+         Z-aux : Coalgebra P
+         Z-aux = record
+            { X = M-type
+            ; α = λ t → root t , λ b → tree t b
+            }
+            
+         module _ {A : Coalgebra P} where
+            open Coalgebra A
+            open Coalgebra Z-aux renaming (X to Z; α to ζ)
+
+            !-aux : Pcat [ A , Z-aux ]
+            !-aux = record
                { map  = map-aux
                ; comm = refl
                }
-               where open Coalgebra A
-                     open Coalgebra Z-aux renaming (X to Z; α to ζ)
-                     map-aux : Sets o [ X , Z ]
-                     -- map-aux x = inf (pr₁₂ (α x)) (λ b → map-aux (pr₃ (α x) b))
-                     map-aux x .root   = pr₁₂ (α x)
-                     map-aux x .tree b = map-aux (pr₃ (α x) b)
+               where map-aux : Sets o [ X , Z ]
+                     map-aux x .root   = proj₁ (α x)
+                     map-aux x .tree b = map-aux (proj₂ (α x) b)
 
-            !-unique-aux : {X : Coalgebra P}
-                         → (f : Pcat [ X , Z-aux ])
-                         → Pcat [ !-aux ≈ f ]
-            !-unique-aux {X} record { map = f-map ; comm = f-comm } {x} =
-               M-ext root-aux tree-aux
+            open Coalg-hom !-aux renaming (map to !-map; comm to !-comm)
 
-               -- begin
-               --    !-map x ≡⟨ {!   !} ⟩
-               --    -- inf (pr₁₂ (α x)) (λ b → !-map (pr₃ (α x) b)) ≡⟨ {!   !} ⟩
-               --    {!   !} ≡⟨ {!   !} ⟩
-               --    {!   !} ≡⟨ {!   !} ⟩
-               --    f-map x ∎
-               where open Coalgebra Z-aux renaming (X to Z; α to ζ)
-                     open Coalgebra X
-                     open Coalg-hom !-aux renaming (map to !-map; comm to !-comm)
-                     
-                     root-aux : root (!-map x) ≡ root (f-map x)
-                     root-aux = begin
-                        root (!-map x)   ≡⟨ refl ⟩
-                        pr₁₂ (α x)      ≡˘⟨ ,-injectiveˡ (cong assocˡ f-comm) ⟩
-                        root (f-map x) ∎
-                        where open Reasoning (Sets o)
-                              open Eq.≡-Reasoning
+            !-unique-aux-aux : (f : Pcat [ A , Z-aux ]) → {x : X}  → !-map x ≅ Coalg-hom.map f x
+            !-unique-aux-aux f@record { map = f-map ; comm = f-comm } {x} =
+               record { root-≡ = root-aux
+                      ; tree-≅ = tree-aux {x}
+                      }
+               where root-aux : {x : X} → root (!-map x) ≡ root (f-map x)
+                     root-aux = sym (cong proj₁ f-comm)
 
-                     tree-aux : tree (!-map x) ≅ tree (f-map x)
-                     tree-aux = begin
-                        tree (!-map x) ≅⟨ hrefl ⟩
-                        (λ b → !-map (proj₂ (proj₂ (α x)) b)) ≅⟨ {!   !} ⟩
-                        {!   !}       ≅⟨ {!   !} ⟩
-                        {!   !}       ≅⟨ {!   !} ⟩
-                        proj₂ (proj₂ (P₁ f-map (α x))) ≅˘⟨ hcong (λ y → proj₂ (proj₂ y)) (HEq.≡-to-≅ root-aux-aux) ⟩
-                        proj₂ (proj₂ (ζ (f-map x)))    ≅⟨ hrefl ⟩
-                        proj₂ (proj₂ ((λ t → pr₁ (root t) , (pr₂ (root t)) , (λ b → tree t b)) (f-map x)))    ≅⟨ {!   !} ⟩
-                        -- proj₂ (proj₂ (pr₁ (root (f-map x)) , pr₂ (root (f-map x)) , tree (f-map x)))   ≅⟨ {!   !} ⟩
-                        tree (f-map x) ∎
-                        where open HEq.≅-Reasoning
+                     tree-aux : {x : X} → (b : B (root (!-map x)))
+                              → tree (!-map x) b ≅ tree (f-map x) (subst B root-aux b)
+                     tree-aux {x} b = bisim-trans
+                        (!-unique-aux-aux f {proj₂ (α x) b})
+                        {!   !}
+                     -- begin
+                     --    tree (!-map x) b      ≅⟨⟩
+                     --    !-map (proj₂ (α x) b) ≅⟨ !-unique-aux-aux {proj₂ (α x) b} ⟩
+                     --    f-map (proj₂ (α x) b) ≡̆⟨ cong (λ e → f-map (proj₂ (α x) e)) subst-lemma ⟩
+                     --    proj₂ (P₁ f-map (α x)) (subst B (cong proj₁ f-comm) (subst B root-aux b))
+                     --       -- ≡̆⟨ cong-app (,-injectiveʳ-≡ {!   !} f-comm (cong proj₁ (f-comm {x}))) {!   !} ⟩
+                     --       ≡̆⟨ cong proj₂ f-comm-lemma  ⟩
+                     --       -- ≡̆⟨ {!  (,-injectiveʳ-≡ ? f-comm (cong proj₁ (f-comm {x})))  !} ⟩
+                     --    proj₂ (ζ (f-map x)) (subst B root-aux b) ≅⟨⟩
+                     --    tree (f-map x) (subst B root-aux b) ∎
+                     --    where open ≅-Reasoning
 
-                              zfx = ζ (f-map x)
-                              pfax = P₁ f-map (α x)
-                              root-aux-aux : zfx ≡ pfax
-                              root-aux-aux = f-comm
+                     --          subst-lemma : subst B (cong proj₁ f-comm) (subst B root-aux b) ≡ b
+                     --          subst-lemma = subst-sym-subst (cong proj₁ f-comm)
+                     --          postulate
+                     --             f-comm-lemma :
+                     --                (root (f-map x) , tree (f-map x) (subst B root-aux b))
+                     --                ≡ (proj₁ (α x) , f-map (proj₂ (α x)  (subst B (cong (λ r → proj₁ r) f-comm) (subst B root-aux b))))
+                     --          -- f-comm-lemma = cong proj₂ {! f-comm  !}
 
-                     -- M-ext : root (!-map x) ≡ root (f-map x)
-                     --       → tree (!-map x) ≡ tree (f-map x)
-                     --       → !-map x ≡ f-map x
-                     -- M-ext p q = {!   !}      
+            !-unique-aux : (f : Pcat [ A , Z-aux ]) → Pcat [ !-aux ≈ f ]
+            !-unique-aux f {x} = M-ext (!-unique-aux-aux f {x})
