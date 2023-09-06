@@ -94,9 +94,9 @@ module _ {o : Level} (B : Set o) where
             !-unique-aux f@record { map = f-map ; comm = f-comm } {x} =
                bisim-trans
                   (!-unique-aux-aux {x})
-                  (bisim-sym f-comm-lift)
+                  f-comm-lift
                where 
-                     f-comm-lift : {x : X} → f-map x ≅ record { tree = λ b → f-map (α x b) }
+                     f-comm-lift : {x : X} →  record { tree = λ b → f-map (α x b) } ≅ f-map x
                      f-comm-lift {x} = record { tree-≅ = λ b → bicong ((λ e → e b)) (f-comm {x}) }
 
                      !-unique-aux-aux : {x : X} → !-map x ≅ record { tree = λ b → f-map (α x b) }

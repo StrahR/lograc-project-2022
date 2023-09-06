@@ -49,8 +49,10 @@ module _ {o : Level} {I : Set o} (B : I → Set o) where
             , (λ _ → M-ext (record { root-≡ = refl
                                    ; tree-≅ = λ _ → bisim-refl }))
             , (λ _ → refl)
-      where comm-aux : {x : PM} → x ≡ (proj₁ x , (λ b → record { root = root (proj₂ x b)
-                                                               ; tree = tree (proj₂ x b) }))
+      where comm-aux : {x : PM}
+                     → (proj₁ x , (λ b → record { root = root (proj₂ x b)
+                                                ; tree = tree (proj₂ x b) }))
+                       ≡ x
             comm-aux = PM-ext refl (λ _ → record { root-≡ = refl
                                                  ; tree-≅ = λ _ → bisim-refl })
  

@@ -65,7 +65,7 @@ module _ {o : Level} {I : Set o} (B : I → Set o) where
                       ; tree-≅ = tree-aux {x}
                       }
                where root-aux : {x : X} → root (!-map x) ≡ root (f-map x)
-                     root-aux = sym (cong proj₁ f-comm)
+                     root-aux = cong proj₁ f-comm
 
                      tree-aux : {x : X} → (b : B (root (!-map x)))
                               → tree (!-map x) b ≅ tree (f-map x) (subst B root-aux b)

@@ -69,12 +69,12 @@ module _ {o : Level} (C B : Set o) where
                      !-unique-aux-aux : (x : X)
                                       → (σ : List B)
                                       → !-map x σ ≡ f-map x σ
-                     !-unique-aux-aux x [] = sym (cong proj₁ f-comm)
+                     !-unique-aux-aux x [] = cong proj₁ f-comm
                      !-unique-aux-aux x (b ∷ σ) = begin
                         !-map x (b ∷ σ)             ≡⟨⟩
                         !-map (proj₂ (α x) b) σ     ≡⟨ !-unique-aux-aux (proj₂ (α x) b) σ ⟩
                         f-map (proj₂ (α x) b) σ     ≡⟨⟩
-                        proj₂ (P₁ f-map (α x)) b σ  ≡⟨ sym (cong (λ e → proj₂ e b σ) f-comm) ⟩
+                        proj₂ (P₁ f-map (α x)) b σ  ≡⟨ cong (λ e → proj₂ e b σ) f-comm ⟩
                         proj₂ (ζ (f-map x)) b σ     ≡⟨⟩
                         f-map x (b ∷ σ)             ∎
                         where open Reasoning (Sets o)
