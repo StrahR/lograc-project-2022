@@ -3,32 +3,34 @@
 module PolyfunctorCoalgebras-mwe where
 
 open import Level using (_⊔_; suc; Level)
--- open import Category
 open import Categories.Category
 open import Data.Product using (Σ; Σ-syntax; _,_; _×_; map; proj₁; proj₂; assocˡ)
-open import Data.Product.Properties using (,-injectiveˡ; ,-injectiveʳ-≡; ,-injectiveʳ-UIP)
--- open import Categories.Category.CartesianClosed using (CartesianClosed) CCC doesn't have coproducts or something
-open import Categories.Functor using (Functor; Endofunctor; _∘F_)
+open import Categories.Functor using (Functor; Endofunctor)
 
 import Relation.Binary.PropositionalEquality as Eq
 open Eq using (_≡_; refl; sym; trans; cong; cong-app; subst; resp)
-open import Relation.Binary.PropositionalEquality.Properties using (subst-subst; subst-subst-sym; subst-sym-subst)
--- import Relation.Binary.HeterogeneousEquality as HEq
--- open HEq using (_≅_) renaming (refl to hrefl; sym to hsym; trans to htrans; cong to hcong)
-
--- open import Categories.Category.BinaryProducts using (BinaryProducts)
-
+open import Relation.Binary.PropositionalEquality.Properties using (subst-subst; subst-subst-sym)
 open import Categories.Category.Instance.Sets
 
 open import Coalgebras
 open import FinalCoalgebras
-open import Polyfunctor renaming (Polyfunctor-simpl-simpl-simpl to Poly)
+
+open import Axiom.Extensionality.Propositional using (Extensionality)
+postulate fun-ext : ∀ {f g} → Extensionality f g
 
 module _ {o : Level} (B : Set o) where
+   Poly : Endofunctor (Sets o)
+   Poly = record
+      { F₀ = λ S → (B → S)
+      ; F₁ = Category._∘_ (Sets o)
+      ; identity = refl
+      ; homomorphism = refl
+      ; F-resp-≈ = λ r → fun-ext (λ _ → r)
+      }
    private
       module S = Category (Sets o)
       P : Endofunctor (Sets o)
-      P = Poly B
+      P = Poly
       Pcat : Category (suc o) o o
       Pcat = CoalgCat P
       open Functor P renaming (F₀ to P₀; F₁ to P₁)
@@ -99,22 +101,3 @@ module _ {o : Level} (B : Set o) where
 
                      !-unique-aux-aux : {x : X} → !-map x ≅ record { tree = λ b → f-map (α x b) }
                      !-unique-aux-aux {x} .tree-≅ b = !-unique-aux f {α x b}
-
-   -- open FinalCoalgebra PolyfunctorFinalCoalgebra renaming (Z to M-coalg)
-   M-coalg : Coalgebra P
-   M-coalg = record { X = M-type ; α = tree }
-   PM-coalg : Coalgebra P
-   PM-coalg = record { X = P₀ M-type ; α = P₁ tree }
-   open Coalgebra M-coalg renaming (X to M; α to μ)
-   Lambek : Σ[ f ∈ Pcat [ PM-coalg , M-coalg ] ]
-               ((t :    M-type) → Coalg-hom.map f (tree t) ≡ t)
-             × ((x : P₀ M-type) → tree (Coalg-hom.map f x) ≡ x)
-   Lambek = (record { map = λ x → record { tree = x } ; comm = comm-aux })
-         , (λ t → M-ext (record { tree-≅ = λ b → bisim-refl }))
-         , (λ x → refl)
-         where comm-aux : {x : B → M-type} → x ≡ (λ b → record { tree = tree (x b) })
-               comm-aux {x} = fun-ext (λ b → M-ext (record { tree-≅ = λ b → bisim-refl }))
-
-         -- (λ x → record { tree = x })
-         --    , (λ t → M-ext (record { tree-≅ = λ b → bisim-refl }))
-         --    , (λ x → refl)

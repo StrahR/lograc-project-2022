@@ -1,14 +1,12 @@
 {-# OPTIONS --guardedness #-}
 
--- module M-types where
-
 open import Level using (_⊔_; suc; Level)
 open import Categories.Category
-open import Data.Product using (Σ; Σ-syntax; _,_; _×_; map; proj₁; proj₂; assocˡ)
-open import Categories.Functor using (Functor; Endofunctor; _∘F_)
+open import Data.Product using (Σ; Σ-syntax; _,_; _×_; map; proj₁; proj₂)
+open import Categories.Functor using (Functor)
 
 import Relation.Binary.PropositionalEquality as Eq
-open Eq using (_≡_; refl; sym; trans; cong; cong-app; subst; resp)
+open Eq using (_≡_; refl; sym; trans; cong; subst; resp)
 open import Relation.Binary.PropositionalEquality.Properties using (subst-subst; subst-subst-sym)
 
 module M-types {o : Level} {I : Set o} (B : I → Set o) where
@@ -26,9 +24,9 @@ module M-types {o : Level} {I : Set o} (B : I → Set o) where
          field
             root-≡ : root t ≡ root u
             tree-≅ : (b : B (root t)) → tree t b ≅ tree u (subst B root-≡ b)
+      open _≅_ public
 
       postulate M-ext : {t u : M-type} → t ≅ u → t ≡ u
-      open _≅_ public
 
       bisim-refl : {t : M-type} → t ≅ t
       bisim-refl .root-≡   = refl

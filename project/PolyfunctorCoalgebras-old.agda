@@ -3,26 +3,20 @@
 module PolyfunctorCoalgebras-old where
 
 open import Level using (_⊔_; suc; Level)
--- open import Category
 open import Categories.Category
 open import Data.Product using (Σ; Σ-syntax; _,_; _×_; map; proj₁; proj₂; assocˡ)
 open import Data.Product.Properties using (,-injectiveˡ; ,-injectiveʳ-≡; ,-injectiveʳ-UIP)
--- open import Categories.Category.CartesianClosed using (CartesianClosed) CCC doesn't have coproducts or something
-open import Categories.Functor using (Functor; Endofunctor; _∘F_)
+open import Categories.Functor using (Functor; Endofunctor)
 
 import Relation.Binary.PropositionalEquality as Eq
 open Eq using (_≡_; refl; sym; trans; cong; cong-app; subst; resp)
-open import Relation.Binary.PropositionalEquality.Properties using (subst-subst; subst-subst-sym; subst-sym-subst)
--- import Relation.Binary.HeterogeneousEquality as HEq
--- open HEq using (_≅_) renaming (refl to hrefl; sym to hsym; trans to htrans; cong to hcong)
-
--- open import Categories.Category.BinaryProducts using (BinaryProducts)
+open import Relation.Binary.PropositionalEquality.Properties using (subst-subst; subst-subst-sym)
 
 open import Categories.Category.Instance.Sets
 
 open import Coalgebras
 open import FinalCoalgebras
-open import Polyfunctor renaming (Polyfunctor-simpl to Poly)
+open import Polyfunctor renaming (Polyfunctor to Poly)
 
 module _ {o : Level} {I : Set o} (B : I → Set o) where
    private
