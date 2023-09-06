@@ -25,12 +25,13 @@ open import FinalCoalgebras
 open import Polyfunctor renaming (Polyfunctor-simpl-simpl-simpl to Poly)
 
 module _ {o : Level} (B : Set o) where
-   module S = Category (Sets o)
-   P : Endofunctor (Sets o)
-   P = Poly B
-   Pcat : Category (suc o) o o
-   Pcat = CoalgCat P
-   open Functor P renaming (F₀ to P₀; F₁ to P₁)
+   private
+      module S = Category (Sets o)
+      P : Endofunctor (Sets o)
+      P = Poly B
+      Pcat : Category (suc o) o o
+      Pcat = CoalgCat P
+      open Functor P renaming (F₀ to P₀; F₁ to P₁)
 
    record M-type : Set o where
       coinductive
@@ -38,38 +39,41 @@ module _ {o : Level} (B : Set o) where
          tree : B → M-type
    open M-type public
 
-   record _≅_ (t u : M-type) : Set o where
-      coinductive
-      field
-         tree-≅ : (b : B) → tree t b ≅ tree u b
+   module Bisimilarity where
+      record _≅_ (t u : M-type) : Set o where
+         coinductive
+         field
+            tree-≅ : (b : B) → tree t b ≅ tree u b
 
-   postulate M-ext : {t u : M-type} → t ≅ u → t ≡ u
+      open _≅_ public
+      postulate M-ext : {t u : M-type} → t ≅ u → t ≡ u
 
-   open _≅_ public
+      bisim-refl : {t : M-type} → t ≅ t
+      bisim-refl .tree-≅ _ = bisim-refl
+      ≡-to-≅ : {t u : M-type} → t ≡ u → t ≅ u
+      ≡-to-≅ refl = bisim-refl
 
-   bisim-refl : {t : M-type} → t ≅ t
-   bisim-refl .tree-≅ _ = bisim-refl
-   ≡-to-≅ : {t u : M-type} → t ≡ u → t ≅ u
-   ≡-to-≅ refl = bisim-refl
+      bisim-transʳ : {t u v : M-type} → t ≅ u → u ≡ v → t ≅ v
+      bisim-transʳ p refl = p
+      bisim-transˡ : {t u v : M-type} → t ≡ u → u ≅ v → t ≅ v
+      bisim-transˡ refl p = p
+      bisim-trans : {t u v : M-type} → t ≅ u → u ≅ v → t ≅ v
+      bisim-trans p q .tree-≅ b = bisim-trans (tree-≅ p b) (tree-≅ q b)
+      bisim-sym : {t u : M-type} → t ≅ u → u ≅ t
+      bisim-sym p .tree-≅ b = bisim-sym (tree-≅ p b)
 
-   bisim-transʳ : {t u v : M-type} → t ≅ u → u ≡ v → t ≅ v
-   bisim-transʳ p refl = p
-   bisim-transˡ : {t u v : M-type} → t ≡ u → u ≅ v → t ≅ v
-   bisim-transˡ refl p = p
-   bisim-trans : {t u v : M-type} → t ≅ u → u ≅ v → t ≅ v
-   bisim-trans {t} {u} {v} p q .tree-≅ b =
-      bisim-trans
-         (tree-≅ p b)
-         (tree-≅ q b)
+      bicong : {A : Set o} (f : A → M-type) → {x y : A} → x ≡ y → f x ≅ f y
+      bicong f refl .tree-≅ b = bisim-refl
+   open Bisimilarity
 
    -- {-# NON_TERMINATING #-}
    PolyfunctorFinalCoalgebra : FinalCoalgebra P
    PolyfunctorFinalCoalgebra = record
       { Z        = M-coalg
       ; !        = !
-      ; !-unique = !-unique-aux
+      ; !-unique = λ f {x} → M-ext (!-unique-aux f {x}) --!-unique-aux
       }
-      where 
+      where
          M-coalg : Coalgebra P
          M-coalg = record { X = M-type ; α = tree }
          module _ {A : Coalgebra P} where
@@ -83,13 +87,34 @@ module _ {o : Level} (B : Set o) where
 
             open Coalg-hom ! renaming (map to !-map; comm to !-comm)
 
-            !-unique-aux : (f : Pcat [ A , M-coalg ]) → Pcat [ ! ≈ f ]
+            !-unique-aux : (f : Pcat [ A , M-coalg ]) → {x : X} → Coalg-hom.map ! x ≅ Coalg-hom.map f x --Pcat [ ! ≈ f ]
             -- !-unique-aux f {x} = M-ext (!-unique-aux-aux f {x})
             !-unique-aux f@record { map = f-map ; comm = f-comm } {x} =
-               trans (M-ext (!-unique-aux-aux {x})) (sym f-comm-lift)
-               where !-unique-aux-aux : {x : X} → !-map x ≅ record { tree = λ b → f-map (α x b) }
-                     !-unique-aux-aux {x} .tree-≅ b =
-                        ≡-to-≅ (!-unique-aux f {α x b})
+               bisim-trans
+                  (!-unique-aux-aux {x})
+                  (bisim-sym f-comm-lift)
+               where 
+                     f-comm-lift : {x : X} → f-map x ≅ record { tree = λ b → f-map (α x b) }
+                     f-comm-lift {x} = record { tree-≅ = λ b → bicong ((λ e → e b)) (f-comm {x}) }
 
-                     f-comm-lift : f-map x ≡ record { tree = λ b → f-map (α x b) }
-                     f-comm-lift = M-ext (record { tree-≅ = λ b → ≡-to-≅ (cong (λ e → e b) (f-comm {x})) })
+                     !-unique-aux-aux : {x : X} → !-map x ≅ record { tree = λ b → f-map (α x b) }
+                     !-unique-aux-aux {x} .tree-≅ b = !-unique-aux f {α x b}
+
+   -- open FinalCoalgebra PolyfunctorFinalCoalgebra renaming (Z to M-coalg)
+   M-coalg : Coalgebra P
+   M-coalg = record { X = M-type ; α = tree }
+   PM-coalg : Coalgebra P
+   PM-coalg = record { X = P₀ M-type ; α = P₁ tree }
+   open Coalgebra M-coalg renaming (X to M; α to μ)
+   Lambek : Σ[ f ∈ Pcat [ PM-coalg , M-coalg ] ]
+               ((t :    M-type) → Coalg-hom.map f (tree t) ≡ t)
+             × ((x : P₀ M-type) → tree (Coalg-hom.map f x) ≡ x)
+   Lambek = (record { map = λ x → record { tree = x } ; comm = comm-aux })
+         , (λ t → M-ext (record { tree-≅ = λ b → bisim-refl }))
+         , (λ x → refl)
+         where comm-aux : {x : B → M-type} → x ≡ (λ b → record { tree = tree (x b) })
+               comm-aux {x} = fun-ext (λ b → M-ext (record { tree-≅ = λ b → bisim-refl }))
+
+         -- (λ x → record { tree = x })
+         --    , (λ t → M-ext (record { tree-≅ = λ b → bisim-refl }))
+         --    , (λ x → refl)
