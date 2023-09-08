@@ -19,16 +19,16 @@ record FinalCoalgebra {C : Category o l e} (F : Endofunctor C) : Set (o ⊔ l �
    open Coalgebra
    field
       Z : Coalgebra F
-      ! : {A : Coalgebra F} → (A ⇒ Z)
-      !-unique : ∀ {A} → (f : A ⇒ Z) → ! ≈ f
+      ! : {{A : Coalgebra F}} → (A ⇒ Z)
+      !-unique : ∀ {{A}} → {f : A ⇒ Z} → ! ≈ f
    open Coalgebra Z public
 
-   !-unique₂ : ∀ {A : Coalgebra F} {f g : A ⇒ Z} → f ≈ g
-   !-unique₂ {A} {f} {g} = begin
-      f ≈˘⟨ !-unique f ⟩
-      ! ≈⟨  !-unique g ⟩
+   !-unique₂ : {{A : Coalgebra F}} {f g : A ⇒ Z} → f ≈ g
+   !-unique₂ {f} {g} = begin
+      f ≈˘⟨ !-unique {f} ⟩
+      ! ≈⟨  !-unique {g} ⟩
       g ∎
       where open HomReasoning
 
    automf-id : (f : Z ⇒ Z) → f ≈ id
-   automf-id f = !-unique₂ {Z} {f} {id}
+   automf-id f = !-unique₂ {{Z}} {f} {id}

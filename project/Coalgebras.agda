@@ -57,7 +57,7 @@ module _ {C : Category o l e} where
 
             id-comm-aux : {A : Coalgebra F}
                         → CommutativeSquare C (α A) id→ (F₁ id→) (α A)
-            id-comm-aux {A} = cong₃ (toSquareₕ refl) identity
+            id-comm-aux = cong₃ (toSquareₕ refl) identity
 
             ∘-comm-aux : {K L M : Coalgebra F}
                      → (f : Coalg-hom L M) → (g : Coalg-hom K L)
